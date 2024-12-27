@@ -1,0 +1,44 @@
+use Nat/gte as gte
+use Nat/sub as sub
+
+// order a list of nats
+Order: (List Nat) -> (List Nat)
+| #Nil        = #Nil
+| #Cons{x xs} = (Insert x (Order xs))
+
+// insert a nat into a list of nats
+Insert : Nat -> (List Nat) -> (List Nat)
+| x #Nil = #Cons{x #Nil}
+| x #Cons{y ys} = 
+    match (gte x y) { 
+      #True  : (#Cons{x (#Cons{y ys})})
+      #False : (#Cons{y (Insert x ys)})
+    }
+
+// Subtract smaller from bigger
+Diff : Nat -> Nat -> Nat
+| x y = 
+  match (gte x y) {
+    #True  : (sub x y)
+    #False : (sub y x)
+  }
+
+// Subtract two lists of nats
+DiffList: (List Nat) -> (List Nat) -> (List Nat)
+| #Nil        #Nil        = #Nil
+| #Nil        #Cons{y ys} = #Cons{y ys}
+| #Cons{x xs} #Nil        = #Cons{x xs}
+| #Cons{x xs} #Cons{y ys} = #Cons{(Diff x y) (DiffList xs ys)}
+
+// Distance between two lists of nats
+Distance: (List Nat) -> (List Nat) -> (List Nat)
+| x y = (DiffList (Order x) (Order y))
+
+// Total distance between two lists of nats
+TotalDistance: (List Nat) -> Nat
+| #Nil = #0
+| #Cons{x xs} = (Nat/add x (TotalDistance xs))
+
+// Main function
+main: (Nat)
+= (TotalDistance(Distance [#3 #4 #2 #1 #3 #3] [#4 #3 #5 #3 #9 #3]))
